@@ -1,0 +1,49 @@
+<mxfile host="65bd71144e">
+    <diagram id="EZqNDubxh7qlHNRu-uqW" name="Page-1">
+        <mxGraphModel dx="2550" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="7" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="120" y="70" width="480" height="370" as="geometry"/>
+                </mxCell>
+                <mxCell id="8" value="Ops &amp;amp; Infrastructure" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="470" y="70" width="130" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="13" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="9" target="10">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="9" value="Github Repo" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="305" y="110" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" style="edgeStyle=none;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="11">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="12">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="Github Actions" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="305" y="225" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="Terraform IaC" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="170" y="340" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" value="Amazon ECR" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="425" y="340" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-300" y="520" width="1610" height="670" as="geometry"/>
+                </mxCell>
+                <mxCell id="17" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-290" y="530" width="690" height="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="410" y="530" width="890" height="650" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="Module 1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="-210" y="560" width="70" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
