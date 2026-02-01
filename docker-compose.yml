@@ -1,29 +1,126 @@
-services:
-  db:
-    image: postgres:13-alpine
-    container_name: my_postgres_db
-    environment:
-      # Cú pháp ${BIEN_O_FILE_ENV}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
-    ports:
-      - "5435:5432"
-    volumes:
-      - pg_data:/var/lib/postgresql/data
+version: '3.8'
 
+services:
+  # --- 1. POSTGRES DATABASE ---
+  db:
+    container_name: my_postgres_db
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # --- 2. PYTHON CRAWLER ---
   crawler:
-    build: ./app
     container_name: my_python_crawler
+    build: ./app
+    command: tail -f /dev/null
     depends_on:
       - db
     environment:
-      PYTHONUNBUFFERED: 1  # <--- THÊM DÒNG NÀY
       DB_HOST: db
-      DB_NAME: ${POSTGRES_DB}
-      DB_USER: ${POSTGRES_USER}
-      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION}
+      AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
     volumes:
       - ./app:/app
+      - ./utils:/app/utils
+
+  # --- 3. SPARK MASTER (Đã sửa cho Image Apache) ---
+  spark-master:
+    # image: apache/spark:3.5.1
+    build:
+      context: .
+      dockerfile: Dockerfile_Spark
+    container_name: spark-master
+    hostname: spark-master
+    # Lệnh khởi động Master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    ports:
+      - "8080:8080" # Web UI
+      - "7077:7077" # Master Port
+    volumes:
+      - ./spark_jobs:/opt/spark/jobs # Sửa đường dẫn thành /opt/spark
+      - ./utils:/opt/spark/utils
+
+  # --- 4. SPARK WORKER (Đã sửa cho Image Apache) ---
+  spark-worker:
+    image: apache/spark:3.5.1
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    # Lệnh khởi động Worker và trỏ về Master
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      - SPARK_WORKER_MEMORY=1G
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASS=${DB_PASS}
+    volumes:
+      - ./spark_jobs:/opt/spark/jobs # Sửa đường dẫn thành /opt/spark
+    # --- 6. AIRFLOW (HỆ THỐNG ĐIỀU PHỐI) ---
+  airflow:
+    #image: apache/airflow:2.7.1
+    build:
+      context: .
+      dockerfile: Dockerfile_Airflow
+    container_name: airflow_scheduler
+    restart: always
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@postgres_airflow/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False  # Tắt các ví dụ mẫu cho đỡ rối mắt
+      - AIRFLOW__WEBSERVER__EXPOSE_CONFIG=True
+    ports:
+      - "8081:8080" # Cổng vào web Airflow
+    volumes:
+      - ./dags:/opt/airflow/dags   # Mount thư mục dags vào trong container
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - /var/run/docker.sock:/var/run/docker.sock # <--- CHÌA KHÓA: Cho phép Airflow điều khiển Docker
+    depends_on:
+      - postgres_airflow
+    # Lệnh này chạy 1 lèo: Khởi tạo DB -> Tạo User Admin -> Chạy Webserver & Scheduler
+    command: bash -c "airflow db init && airflow users create --username admin --password admin --firstname Thien --lastname DE --role Admin --email admin@example.com && airflow webserver & airflow scheduler"
+
+  # Database riêng cho Airflow (Không dùng chung với Tiki DB)
+  postgres_airflow:
+    image: postgres:13
+    container_name: airflow_db
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    volumes:
+      - airflow_db_data:/var/lib/postgresql/data
 volumes:
-  pg_data:
+  postgres_data:
+  airflow_db_data:

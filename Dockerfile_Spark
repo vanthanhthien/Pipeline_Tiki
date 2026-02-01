@@ -1,0 +1,9 @@
+FROM apache/spark:3.5.1
+
+USER root
+
+# Cài đặt thư viện Python nếu cần
+RUN pip install --no-cache-dir pyspark psycopg2-binary python-dotenv
+
+# Chuyển lại quyền cho user spark (QUAN TRỌNG)
+USER spark

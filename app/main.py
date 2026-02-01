@@ -1,104 +1,146 @@
-import requests
-import psycopg2
 import time
 import os
-import json
+import sys
 from datetime import datetime
+import database
+import tiki_api
+import storage
 
-# --- CẤU HÌNH BẢO MẬT ---
-# Lấy trực tiếp từ biến môi trường. 
-# Tuyệt đối không để giá trị mặc định (như 'admin123') ở tham số thứ 2.
-DB_HOST = os.environ.get('DB_HOST')
-DB_NAME = os.environ.get('DB_NAME')
-DB_USER = os.environ.get('DB_USER')
-DB_PASS = os.environ.get('DB_PASS')
+# --- CẤU HÌNH ĐƯỜNG DẪN IMPORT UTILS ---
+# Vì trong Docker ta mount ./utils vào /app/utils, nên Python sẽ tìm thấy ngay
+try:
+    from utils.job_monitor import JobMonitor
+except ImportError:
+    # Fallback phòng trường hợp chạy local máy tính cá nhân
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from utils.job_monitor import JobMonitor
 
-# Kiểm tra an toàn: Nếu thiếu biến nào thì dừng ngay lập tức
-if not all([DB_HOST, DB_NAME, DB_USER, DB_PASS]):
-    print("❌ LỖI BẢO MẬT: Thiếu biến môi trường! Hãy kiểm tra file .env và docker-compose.yml")
-    exit(1)
-
-# Cấu hình Tiki API
-TIKI_URL = "https://tiki.vn/api/personalish/v1/blocks/listings?limit=40&include=advertisement&aggregations=2&version=home-persionalized&trackity_id=739e5590-7f53-8390-1b77-245c364c6762&category=1789&page=1&urlKey=dien-thoai-may-tinh-bang"
-HEADERS = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Referer': 'https://tiki.vn/'
-}
-
-def connect_db():
-    print("⏳ DOCKER: Đang kết nối Database...")
-    while True:
-        try:
-            conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS)
-            print("✅ Kết nối Database thành công!")
-            return conn
-        except Exception as e:
-            print(f"⚠️ Đang chờ Database khởi động... Lỗi: {e}")
-            time.sleep(3)
-
-def create_table(curr):
-    query = """
-    CREATE TABLE IF NOT EXISTS tiki_products (
-        id SERIAL PRIMARY KEY,
-        product_id BIGINT UNIQUE,
-        name TEXT,
-        price INT,
-        discount_rate INT,
-        rating_average REAL,
-        review_count INT,
-        thumbnail_url TEXT,
-        product_url TEXT,
-        crawled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """
-    curr.execute(query)
-    print("✅ Đã kiểm tra bảng 'tiki_products'.")
-
-def crawl_and_save():
-    conn = connect_db()
-    curr = conn.cursor()
-    create_table(curr)
-
-    print(f"🚀 Bắt đầu cào dữ liệu từ Tiki API...")
+def run():
+    # 1. KHỞI TẠO MONITOR & DB
+    # Job Name trùng với Task ID trong Airflow để dễ khớp
+    job_name = "1_crawl_raw_data"
+    run_date = datetime.now().strftime('%Y-%m-%d')
     
+    monitor = JobMonitor(job_name=job_name, run_date=run_date)
+    monitor.start()
+
+    conn = database.connect_db()
+    curr = conn.cursor()
+    
+    # Tạo bảng nếu chưa có (Lưu ý: Upsert sẽ không làm mất dữ liệu cũ)
+    database.create_table(curr)
+
+    all_products = []
+    START_PAGE = 1
+    END_PAGE = 20  # Config số trang cần cào
+    
+    total_items_processed = 0
+
+    print(f"🚀 [JOB: {job_name}] BẮT ĐẦU CÀO TỪ TRANG {START_PAGE} ĐẾN {END_PAGE}...")
+
     try:
-        response = requests.get(TIKI_URL, headers=HEADERS)
-        
-        if response.status_code == 200:
-            data = response.json()
-            products = data.get('data', [])
-            print(f"📦 Đã tìm thấy {len(products)} sản phẩm. Đang lưu vào DB...")
-
-            inserted_count = 0
-            for item in products:
-                p_id = item.get('id')
-                name = item.get('name')
-                price = item.get('price')
-                discount = item.get('discount_rate', 0)
-                rating = item.get('rating_average', 0)
-                reviews = item.get('review_count', 0)
-                thumb = item.get('thumbnail_url')
-                p_url = f"https://tiki.vn/{item.get('url_path')}"
-
-                sql = """
-                INSERT INTO tiki_products (product_id, name, price, discount_rate, rating_average, review_count, thumbnail_url, product_url)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (product_id) 
-                DO UPDATE SET price = EXCLUDED.price, crawled_at = CURRENT_TIMESTAMP;
-                """
-                curr.execute(sql, (p_id, name, price, discount, rating, reviews, thumb, p_url))
-                inserted_count += 1
+        for page in range(START_PAGE, END_PAGE + 1):
+            page_start_time = time.time()
             
+            # --- BƯỚC A: LẤY DANH SÁCH ID ---
+            list_products = tiki_api.get_products_by_page(page)
+            if not list_products:
+                print(f"⚠️ Trang {page}: Không có dữ liệu hoặc bị chặn.")
+                break
+            
+            print(f"--> Trang {page}: Tìm thấy {len(list_products)} sản phẩm. Đang lấy chi tiết...")
+
+            # --- BƯỚC B: LẤY CHI TIẾT (DEEP CRAWL) ---
+            items_in_page = 0
+            for item in list_products:
+                pid = item.get('id')
+                if not pid: continue
+
+                full_info = tiki_api.get_product_detail(pid)
+                
+                if full_info:
+                    # Logic xử lý số lượng bán
+                    qty_sold = 0
+                    if 'all_time_quantity_sold' in full_info:
+                         qty_sold = full_info.get('all_time_quantity_sold', 0)
+                    elif 'quantity_sold' in full_info and isinstance(full_info['quantity_sold'], dict):
+                         qty_sold = full_info['quantity_sold'].get('value', 0)
+
+                    # Chuẩn hóa object
+                    clean_item = {
+                        "id": full_info.get("id"),
+                        "sku": full_info.get("sku"),
+                        "name": full_info.get("name"),
+                        "price": full_info.get("price"),
+                        "original_price": full_info.get("original_price", 0),
+                        "discount_rate": full_info.get("discount_rate", 0),
+                        "rating_average": full_info.get("rating_average", 0),
+                        "review_count": full_info.get("review_count", 0),
+                        "inventory_status": full_info.get("inventory_status", "unknown"),
+                        "all_time_quantity_sold": qty_sold, 
+                        "thumbnail_url": full_info.get("thumbnail_url", ""),
+                        "product_url": full_info.get("short_url", ""), 
+                        "brand_name": full_info.get("brand", {}).get("name", "No Brand"),
+                        "category_id": full_info.get("categories", {}).get("id")
+                    }
+                    
+                    if not clean_item['name'] or not clean_item['price']: continue
+
+                    all_products.append(clean_item)
+                    
+                    # Upsert Database
+                    try:
+                        database.upsert_product(curr, clean_item) 
+                    except TypeError:
+                        database.upsert_product(curr, clean_item)
+
+                    items_in_page += 1
+                
+                # Nghỉ ngắn tránh chặn IP
+                time.sleep(0.5)
+
             conn.commit()
-            print(f"🎉 THÀNH CÔNG! Đã lưu/cập nhật {inserted_count} sản phẩm vào Postgres.")
+            total_items_processed += items_in_page
+            
+            page_duration = time.time() - page_start_time
+            print(f"   ✅ Xong trang {page}. Lấy được {items_in_page} món. Mất {page_duration:.2f}s")
+            time.sleep(2)
+
+        # 3. LƯU S3
+        if all_products:
+            timestamp = datetime.now().strftime('%H%M%S')
+            filename = f"tiki_raw_{timestamp}.csv"
+            
+            storage.save_to_csv(all_products, filename)
+            
+            now = datetime.now()
+            s3_path = f"bronze/tiki/year={now.year}/month={now.month:02d}/day={now.day:02d}/{filename}"
+            storage.upload_to_s3(filename, s3_path)
+            os.remove(filename)
+            print("📦 Đã upload dữ liệu lên S3 Bronze.")
+            
+            # --- GHI LOG THÀNH CÔNG VÀO DB ---
+            # Ghi lại tổng kết: Số trang, số sản phẩm
+            metrics = {
+                "pages_crawled": END_PAGE - START_PAGE + 1,
+                "s3_path": s3_path
+            }
+            monitor.stop(records_count=total_items_processed, status="SUCCESS", metrics=metrics)
+            print(f"🏁 JOB COMPLETED. Tổng sản phẩm: {total_items_processed}")
+            
         else:
-            print(f"❌ Lỗi khi gọi API Tiki: {response.status_code}")
+            print("⚠️ Không thu thập được dữ liệu nào.")
+            monitor.stop(status="WARNING", error_msg="No products found")
 
     except Exception as e:
-        print(f"❌ Có lỗi xảy ra: {e}")
+        print(f"❌ CRITICAL ERROR: {e}")
+        # --- GHI LOG THẤT BẠI VÀO DB ---
+        monitor.stop(status="FAILED", error_msg=str(e))
+        raise e # Raise lỗi để Airflow biết mà báo đỏ
+
     finally:
         curr.close()
         conn.close()
 
 if __name__ == "__main__":
-    crawl_and_save()
+    run()

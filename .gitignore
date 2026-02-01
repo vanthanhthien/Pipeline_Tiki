@@ -1,12 +1,35 @@
-# Bỏ qua dữ liệu DB local
-pg_data/
-
-# Bỏ qua file môi trường chứa mật khẩu 
+# --- 1. FILE BẢO MẬT (TUYỆT ĐỐI KHÔNG PUSH) ---
 .env
+.env.local
+config.py
+secrets/
+*.pem
+*.key
 
-# Bỏ qua rác của Python (Mấy cái này tự sinh ra khi chạy code)
+# --- 2. PYTHON & MÔI TRƯỜNG ẢO ---
 __pycache__/
-*.pyc
-.pytest_cache/
+*.py[cod]
 venv/
+env/
+.pytest_cache/
+
+# --- 3. DỮ LIỆU & LOGS (NẶNG & RÁC) ---
+logs/
+*.log
+data/
+postgres_data/
+airflow_db_data/
+airflow/logs/
+airflow/plugins/__pycache__/
+speed_log.csv
+
+# --- 4. CẤU HÌNH IDE (MÁY CÁ NHÂN) ---
 .vscode/
+.idea/
+*.DS_Store
+
+# --- 5. SPARK & JAVA RÁC ---
+metastore_db/
+derby.log
+spark-warehouse/
+checkpoint/

@@ -1,47 +1,200 @@
 <mxfile host="65bd71144e">
     <diagram id="EZqNDubxh7qlHNRu-uqW" name="Page-1">
-        <mxGraphModel dx="2550" dy="790" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="2770" dy="1129" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
-                <mxCell id="7" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="120" y="70" width="480" height="370" as="geometry"/>
+                <mxCell id="19" value="" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="90" y="310" width="280" height="170" as="geometry"/>
                 </mxCell>
-                <mxCell id="8" value="Ops &amp;amp; Infrastructure" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
-                    <mxGeometry x="470" y="70" width="130" height="30" as="geometry"/>
+                <mxCell id="20" value="data ingeston" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="100" y="320" width="100" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="13" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="9" target="10">
+                <mxCell id="23" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="21" target="22" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="9" value="Github Repo" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="305" y="110" width="120" height="60" as="geometry"/>
+                <mxCell id="21" value="Tiki API/ website" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="320" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="14" style="edgeStyle=none;html=1;exitX=0.25;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="11">
+                <mxCell id="22" value="Python crawler container" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="130" y="400" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="24" value="" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-480" y="360" width="190" height="120" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="management and coordination" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="-480" y="360" width="190" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="27" value="1. Trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" parent="1" source="26" target="22" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="15" style="edgeStyle=none;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="10" target="12">
+                <mxCell id="26" value="Apache Airflow" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-445" y="400" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="28" value="" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="10" y="550" width="370" height="420" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="data lake (aws s3)" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="260" y="560" width="120" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="30" value="Raw csv (bronze layer)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="630" width="280" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="31" value="save CSV" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="22" target="30" edge="1">
+                    <mxGeometry x="-0.2941" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="Clean Parquet (Silver layer)" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" parent="1" vertex="1">
+                    <mxGeometry x="50" y="810" width="280" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-470" y="600" width="320" height="340" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="Spark job&lt;div&gt;bronze-&amp;gt;silver&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-350" y="650" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="38" value="Read" style="edgeStyle=none;html=1;" parent="1" source="30" target="34" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="50" y="680" as="sourcePoint"/>
+                        <mxPoint x="-260" y="680" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="41" value="2. trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="26" target="34" edge="1">
+                    <mxGeometry x="-0.5295" relative="1" as="geometry">
+                        <mxPoint x="-385" y="290" as="sourcePoint"/>
+                        <mxPoint x="-385" y="650" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-385" y="680"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="42" value="Write Parquet" style="edgeStyle=none;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" parent="1" source="34" target="32" edge="1">
+                    <mxGeometry x="-0.3262" y="-6" relative="1" as="geometry">
+                        <mxPoint y="1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="43" value="Spark job&lt;div&gt;silver-&amp;gt;gold&lt;/div&gt;" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-445" y="830" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" value="3.trigger" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="26" target="43" edge="1">
+                    <mxGeometry x="-0.5435" relative="1" as="geometry">
+                        <mxPoint x="-445" y="260" as="sourcePoint"/>
+                        <mxPoint x="-445" y="860" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-460" y="430"/>
+                            <mxPoint x="-460" y="860"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="48" value="read" style="edgeStyle=none;html=1;" parent="1" source="32" target="43" edge="1">
+                    <mxGeometry x="-0.3067" relative="1" as="geometry">
+                        <mxPoint x="50" y="860" as="sourcePoint"/>
+                        <mxPoint x="-325" y="860" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="50" value="big data processing" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="-280" y="600" width="130" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="51" value="" style="whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="-10" y="1010" width="460" height="420" as="geometry"/>
+                </mxCell>
+                <mxCell id="52" value="monitoring and logging" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+                    <mxGeometry x="230" y="1010" width="140" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="54" value="ultis/job_monitor.py" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="80" y="1040" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="57" value="log duration" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" parent="1" source="34" target="54" edge="1">
+                    <mxGeometry x="0.2056" relative="1" as="geometry">
+                        <mxPoint x="-280" y="720" as="sourcePoint"/>
+                        <mxPoint x="90" y="1080" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-290" y="1055"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="59" value="log star/end" style="edgeStyle=orthogonalEdgeStyle;html=1;" parent="1" source="22" target="54" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="250" y="445" as="sourcePoint"/>
+                        <mxPoint x="200" y="1070" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="470" y="450"/>
+                            <mxPoint x="470" y="1070"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="60" value="Table: pipeline_logs" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+                    <mxGeometry y="1250" width="280" height="100" as="geometry"/>
+                </mxCell>
+                <mxCell id="62" value="log status" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="43" target="54">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="-355" y="890" as="sourcePoint"/>
+                        <mxPoint x="80" y="1085" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-385" y="1085"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="63" value="Insert logs" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="54" target="60">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="10" value="Github Actions" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="305" y="225" width="120" height="60" as="geometry"/>
+                <mxCell id="64" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-620" y="1160" width="420" height="290" as="geometry"/>
                 </mxCell>
-                <mxCell id="11" value="Terraform IaC" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="170" y="340" width="120" height="60" as="geometry"/>
+                <mxCell id="66" value="data warehouse" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+                    <mxGeometry x="-610" y="1160" width="110" height="30" as="geometry"/>
                 </mxCell>
-                <mxCell id="12" value="Amazon ECR" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="425" y="340" width="120" height="60" as="geometry"/>
+                <mxCell id="68" value="pgadmin" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+                    <mxGeometry x="-550" y="1270" width="280" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="16" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="-300" y="520" width="1610" height="670" as="geometry"/>
+                <mxCell id="70" value="write aggregated data" style="edgeStyle=none;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.25;exitY=1;exitDx=0;exitDy=0;" edge="1" parent="1" source="43" target="68">
+                    <mxGeometry x="0.2103" y="-3" relative="1" as="geometry">
+                        <mxPoint x="-420" y="880" as="sourcePoint"/>
+                        <mxPoint x="-410" y="1270" as="targetPoint"/>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
                 </mxCell>
-                <mxCell id="17" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="-290" y="530" width="690" height="650" as="geometry"/>
+                <mxCell id="71" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-380" y="1550" width="450" height="160" as="geometry"/>
                 </mxCell>
-                <mxCell id="18" value="" style="whiteSpace=wrap;html=1;" vertex="1" parent="1">
-                    <mxGeometry x="410" y="530" width="890" height="650" as="geometry"/>
+                <mxCell id="72" value="report&lt;br&gt;Power BI" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-230" y="1620" width="120" height="60" as="geometry"/>
                 </mxCell>
-                <mxCell id="19" value="Module 1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
-                    <mxGeometry x="-210" y="560" width="70" height="30" as="geometry"/>
+                <mxCell id="74" value="Read data" style="edgeStyle=orthogonalEdgeStyle;html=1;" edge="1" parent="1" source="68" target="72">
+                    <mxGeometry x="-0.3779" relative="1" as="geometry">
+                        <mxPoint x="-410" y="1370" as="sourcePoint"/>
+                        <mxPoint x="-230" y="1650" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-400" y="1650"/>
+                        </Array>
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="76" value="analyze health" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="60" target="72">
+                    <mxGeometry x="-0.4546" relative="1" as="geometry">
+                        <mxPoint x="140" y="1350" as="sourcePoint"/>
+                        <mxPoint x="-110" y="1650" as="targetPoint"/>
+                        <mxPoint y="-1" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="77" value="speed_logs.csv" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="305" y="1145" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="79" value="ghi file log" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" target="77">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="250" y="430" as="sourcePoint"/>
+                        <mxPoint x="425" y="1175" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="520" y="431"/>
+                            <mxPoint x="520" y="1175"/>
+                        </Array>
+                    </mxGeometry>
                 </mxCell>
             </root>
         </mxGraphModel>
