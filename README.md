@@ -1,100 +1,101 @@
-## 📖 Giới thiệu (Overview)
-Dự án xây dựng một quy trình xử lý dữ liệu (Data Pipeline) hoàn chỉnh (End-to-End) theo kiến trúc **Lakehouse** để thu thập, làm sạch và phân tích dữ liệu sản phẩm từ sàn thương mại điện tử **Tiki.vn**.
+# End-to-End E-commerce Data Pipeline (Tiki.vn)
 
-**Mục tiêu:**
-* Tự động hóa quy trình thu thập dữ liệu hàng ngày.
-* Xây dựng kho dữ liệu tập trung (Data Warehouse).
-* Trực quan hóa biến động giá, doanh thu và chất lượng sản phẩm.
+![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
+![Apache Spark](https://img.shields.io/badge/Apache%20Spark-3.5-orange.svg)
+![Apache Airflow](https://img.shields.io/badge/Apache%20Airflow-2.7-red.svg)
+![Docker](https://img.shields.io/badge/Docker-Compose-2496ED.svg)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI%2FCD-2088FF.svg)
 
----
+## 📖 Introduction
 
-## 🏗️ Kiến trúc hệ thống (Architecture)
+This project implements a scalable, automated **ETL Data Pipeline** to extract, transform, and load (ETL) e-commerce product data from **Tiki.vn** (one of Vietnam's largest online marketplaces).
 
-### Data Flow
-1.  **Ingestion:** Python Crawler thu thập dữ liệu từ API -> Lưu Raw CSV vào **S3 (Bronze Layer)**.
-2.  **Processing (ETL):** Apache Spark đọc dữ liệu từ S3, làm sạch, xử lý -> Lưu Parquet vào **S3 (Silver Layer)**.
-3.  **Aggregation:** Spark tổng hợp dữ liệu (Doanh thu, Top Brand...) -> Lưu vào **PostgreSQL (Gold Layer)**.
-4.  **Serving:** Power BI kết nối với PostgreSQL để lên báo cáo.
-5.  **Orchestration:** Apache Airflow điều phối toàn bộ pipeline.
+The system follows the **Medallion Architecture** (Bronze/Silver/Gold layers) to ensure data quality and supports advanced analytics regarding **Pricing Strategy**, **Sales Performance**, and **Product Quality**.
 
----
+## 🏗️ Architecture & Features
 
-## 📂 Cấu trúc dự án (Project Structure)
+The pipeline is fully containerized using Docker and orchestrated by Apache Airflow.
+
+### Key Features:
+* **Medallion Architecture:**
+    * 🥉 **Bronze:** Raw data ingestion from Tiki API to AWS S3.
+    * 🥈 **Silver:** Data cleaning, deduplication, and schema enforcement using **PySpark**.
+    * 🥇 **Gold:** Business-level aggregation (Revenue, Price Segments, Trust Score) stored in **PostgreSQL**.
+* **Orchestration:** Airflow DAGs schedule and manage dependencies between Crawler, Spark Jobs, and Database loading.
+* **Monitoring:** Custom `JobMonitor` tracks execution time and data quality (error rates).
+* **CI/CD:** Integrated **GitHub Actions** for automated code quality checks.
+
+## 📸 Project Screenshots
+
+### 1. System Health (Docker Containers)
+*Fully containerized environment running Spark Master/Worker, Airflow Scheduler/Webserver, and PostgreSQL.*
+
+![Docker Status](images/docker.jpg)
+
+### 2. Orchestration (Apache Airflow)
+*DAG execution flow: Crawl -> Bronze -> Silver -> Gold Analytics. All tasks executed successfully.*
+
+![Airflow DAG](images/airflow.jpg)
+
+## 🛠️ Tech Stack
+
+* **Language:** Python, SQL.
+* **Processing Engine:** Apache Spark (PySpark).
+* **Orchestration:** Apache Airflow.
+* **Containerization:** Docker, Docker Compose.
+* **Storage:** AWS S3 (Data Lake), PostgreSQL (Data Warehouse).
+* **DevOps:** GitHub Actions (CI/CD).
+
+## 📂 Project Structure
 
 ```bash
-TIKI-DATA-PIPELINE/
-├── app/                    # Source code Crawler
-├── dags/                   # Airflow DAGs
-├── spark_jobs/             # Các Spark Job (ETL)
+├── app/                  # Python Crawler Source Code
+│   ├── main.py           # Crawler Entrypoint
+│   └── tiki_api.py       # API Handling
+├── dags/                 # Airflow DAGs
+│   └── tiki_pipeline.py  # Main DAG Definition
+├── spark_jobs/           # PySpark Transformation Scripts
 │   ├── bronze_to_silver.py
-│   └── silver_to_gold.py
-├── utils/                  # Các module tiện ích
-│   └── job_monitor.py      # Hệ thống giám sát (Monitoring)
-├── docker-compose.yml      # Cấu hình hạ tầng (Infra)
-├── requirements.txt        # Dependencies
-├── .env.example            # Mẫu cấu hình biến môi trường
-└── README.md               # Tài liệu dự án
-🚀 Hướng dẫn cài đặt (Installation)
-1. Yêu cầu (Prerequisites)
-Docker & Docker Desktop.
+│   └── silver_to_gold_analytics.py # Business Logic & Analytics
+├── utils/                # Shared Utilities
+│   └── job_monitor.py    # Custom Monitoring Class
+├── docker-compose.yml    # Infrastructure Setup
+└── requirements.txt      # Python Dependencies
+🏃‍♂️ How to Run
+Prerequisites
+Docker & Docker Compose installed.
 
-Tài khoản AWS S3 (hoặc MinIO).
+An AWS Account (S3 Bucket & Keys).
 
-Python 3.9+.
-
-2. Thiết lập biến môi trường
-Dự án sử dụng biến môi trường để bảo mật thông tin. Hãy đổi tên file .env.example thành .env và điền thông tin của bạn vào:
+Installation
+Clone the repository:
 
 Bash
-# Copy file mẫu
-cp .env.example .env
-Nội dung file .env cần cấu hình:
+git clone [https://github.com/vanthanhthien/Pipeline_Tiki.git](https://github.com/vanthanhthien/Pipeline_Tiki.git)
+cd Pipeline_Tiki
+Configure Environment: Create a .env file in the root directory (based on .env.example):
 
 Đoạn mã
-# AWS Configuration
-AWS_ACCESS_KEY_ID=<your_aws_access_key>
-AWS_SECRET_ACCESS_KEY=<your_aws_secret_key>
-AWS_REGION=ap-southeast-1
-AWS_BUCKET_NAME=<your_s3_bucket_name>
-
-# Database Configuration
-DB_HOST=my_postgres_db
-DB_NAME=tiki_db
-DB_USER=<your_db_user>
-DB_PASS=<your_db_password>
-3. Khởi chạy hệ thống
-Mở terminal tại thư mục gốc và chạy lệnh:
+AWS_ACCESS_KEY_ID=your_key
+AWS_SECRET_ACCESS_KEY=your_secret
+AWS_BUCKET_NAME=your_bucket_name
+DB_USER=admin
+DB_PASS=admin123
+Start Services:
 
 Bash
-docker-compose up -d
-Hệ thống sẽ khởi động các dịch vụ:
+docker-compose up -d --build
+Access Interfaces:
 
-Airflow Webserver: localhost:8081 (Tài khoản mặc định: admin/admin)
+Airflow UI: http://localhost:8081 (User/Pass: admin/admin)
 
-Spark Master: localhost:8080
+Spark Master: http://localhost:8080
 
-PostgreSQL: Port 5434 (mapped from 5432)
+Postgres: localhost:5434
 
-🛠️ Vận hành & Monitoring
-Chạy Job thủ công (Local Testing)
-Để test từng job Spark mà không cần đợi Airflow:
+🔮 Future Roadmap
+[ ] Build a visualization Dashboard using Power BI or Apache Superset.
 
-Cài đặt môi trường ảo:
+[ ] Add Unit Tests for Spark Transformations.
 
-Bash
-pip install -r requirements.txt
-Chạy Job (Ví dụ xử lý dữ liệu ngày 23/01/2026):
-
-Bash
-python spark_jobs/bronze_to_silver.py --date 2026-01-23
-Giám sát hệ thống (Observability)
-Dự án tích hợp module JobMonitor tự động ghi log vào bảng pipeline_logs trong PostgreSQL. Để kiểm tra hiệu suất pipeline, chạy query:
-
-SQL
-SELECT job_name, duration_seconds, status 
-FROM pipeline_logs 
-ORDER BY run_date DESC;
-📊 Dashboard Demo
-(Nơi bạn có thể chèn ảnh chụp màn hình Power BI Dashboard của bạn vào đây)
-
-Author: Thien DE
+[ ] Optimize Spark memory usage for larger datasets.
